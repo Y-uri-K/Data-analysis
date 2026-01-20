@@ -6,7 +6,7 @@ class Config:
             "user": os.getenv("POSTGRES_USER", "user"),
             "password": os.getenv("POSTGRES_PASSWORD", "password"),
             "host": os.getenv("POSTGRES_HOST", "localhost"),
-            "port": os.getenv("POSTGRES_CONNECTION_PORT", "5432"),
+            "port": os.getenv("POSTGRES_INNER_PORT", "5432"),
             "db": os.getenv("POSTGRES_DB", "db"),
         }
 
