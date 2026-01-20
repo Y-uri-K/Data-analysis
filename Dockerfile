@@ -1,3 +1,4 @@
+#Установка зависимостей uv
 FROM python:3.9
 
 RUN pip install uv

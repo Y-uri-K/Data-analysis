@@ -9,30 +9,22 @@ x-redash-service: &redash-service
       condition: service_healthy
   env_file: .env
   environment:
-    REDASH_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@redash-postgres:5432/${POSTGRES_DB}
+    REDASH_DATABASE_URL: postgresql://${REDASH_POSTGRES_USER}:${REDASH_POSTGRES_PASSWORD}@redash-postgres:5432/${REDASH_POSTGRES_DB}
     REDASH_COOKIE_SECRET: ${REDASH_COOKIE_SECRET}
     REDASH_SECRET_KEY: ${REDASH_SECRET_KEY}
     REDASH_REDIS_URL: redis://redash-redis:6379/0
   restart: unless-stopped
 
-x-environment-for-pg: &environment-for-pg
-  DB_USER: ${POSTGRES_USER}
-  DB_PASSWORD: ${POSTGRES_PASSWORD}
-  DB_HOST: data_postgres
-  DB_PORT: ${POSTGRES_INNER_PORT}
-  DB_NAME: ${POSTGRES_DB}
 services:
-  redash-postgres:
+
+  postgres:
     image: postgres:${POSTGRES_VERSION}
-    container_name: ${POSTGRES_HOST}
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5433:${POSTGRES_INNER_PORT}"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     command: >
       postgres -c max_connections=1000
                -c shared_buffers=256MB
@@ -42,9 +34,39 @@ services:
                -c wal_buffers=16MB
                -c default_statistics_target=100
                -c port=${POSTGRES_INNER_PORT}
+    volumes:
+      - ./init-db:/docker-entrypoint-initdb.d:ro
+      - postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -p ${POSTGRES_INNER_PORT}"]
-      interval: 30s
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  redash-postgres:
+    image: postgres:${POSTGRES_VERSION}
+    environment:
+      POSTGRES_DB: ${REDASH_POSTGRES_DB}
+      POSTGRES_USER: ${REDASH_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${REDASH_POSTGRES_PASSWORD}
+    volumes:
+      - redash_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -U ${REDASH_POSTGRES_USER} -d ${REDASH_POSTGRES_DB}"]
+      interval: 20s
       timeout: 10s
       retries: 5
     restart: unless-stopped
@@ -77,8 +99,9 @@ services:
     command: worker
 
 volumes:
+  postgres:
   redash_postgres_data:
   redash_redis_data:
-  postgres_data:
+  pgadmin_data:
 
 
