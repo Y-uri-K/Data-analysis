@@ -35,7 +35,7 @@ services:
                -c default_statistics_target=100
                -c port=${POSTGRES_INNER_PORT}
     volumes:
-      - ./init-db:/docker-entrypoint-initdb.d:ro
+      - ./db:/docker-entrypoint-db.d:ro
       - postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -p ${POSTGRES_INNER_PORT}"]
