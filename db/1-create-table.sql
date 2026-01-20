@@ -20,7 +20,7 @@ ON "actions" ("action_name");
 
 CREATE TABLE IF NOT EXISTS "levels" (
 	"level_id" serial NOT NULL UNIQUE,
-	"difficulty" int NOT NULL,
+	"difficulty" varchar(255) NOT NULL,
 	PRIMARY KEY ("level_id")
 );
 
