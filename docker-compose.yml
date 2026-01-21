@@ -16,7 +16,11 @@ x-redash-service: &redash-service
   restart: unless-stopped
 
 services:
-
+  data-generator:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
   postgres:
     image: postgres:${POSTGRES_VERSION}
     environment:
