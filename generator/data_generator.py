@@ -1,4 +1,3 @@
-import argparse
 from typing import Dict
 
 from faker import Faker
@@ -56,31 +55,3 @@ class DataGenerator:
 
     def close(self):
         self.session.close()
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Генератор игровых данных")
-
-    parser.add_argument("--players", type=int, default=100)
-    parser.add_argument("--events-per-player", type=int, default=100)
-    parser.add_argument("--locale", type=str, default="ru_RU")
-
-    args = parser.parse_args()
-
-    generator = DataGenerator(locale=args.locale)
-
-    try:
-        result = generator.generate_and_save(
-            players_count=args.players,
-            events_per_player=args.events_per_player
-        )
-
-        print("Генерация завершена")
-        print(f"Игроков: {result['players_count']}")
-        print(f"Событий: {result['events_count']}")
-
-    finally:
-        generator.close()
-
-if __name__ == "__main__":
-    main()
