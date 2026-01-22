@@ -11,4 +11,4 @@ ENV PATH="/.venv/bin:$PATH"
 
 COPY . .
 
-CMD ["python", "generator/main.py"]
+CMD ["python", "main.py"]
